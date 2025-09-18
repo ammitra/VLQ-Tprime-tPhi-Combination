@@ -47,3 +47,8 @@ source scripts/make_combined_cards.sh
 * B2G-23-009 only (masks B2G-22-001): `./scripts/Limits-B2G-23-009.sh`
 * B2G-22-001 only (masks B2G-23-009): `./scripts/Limits-B2G-22-001.sh`
 * Run everything (use `screen`): `./scripts/run_combination.sh`
+
+5. Run limits for B2G-23-009 only
+```
+./scripts/B2G-23-009_specific.sh
+```

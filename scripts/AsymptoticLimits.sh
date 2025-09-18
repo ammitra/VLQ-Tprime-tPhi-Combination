@@ -16,8 +16,8 @@ if [[ -f "combination/${sig}/higgsCombine_${sig}.AsymptoticLimits.mH120.root" ]]
 fi
 
 seed=123456
-tol=10
-strat=0
+tol=0.5
+strat=1
 rmax=3
 
 cwd=`pwd`

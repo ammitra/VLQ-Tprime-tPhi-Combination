@@ -70,6 +70,8 @@ fig, ax = plt.subplots(figsize=(14,10), dpi=200)
 
 # Fontsize
 fs = 36
+# linewidth
+lw = 3
 
 # workaround for \mathcal
 plt.rcParams['mathtext.fontset'] = 'custom'
@@ -90,8 +92,8 @@ obs = limits[5]
 
 ax.fill_between(MTs, m2, p2, color=yellow, label='95% CL')
 ax.fill_between(MTs, m1, p1, color=green, label='68% CL')
-ax.plot(MTs, med, color='black', linewidth=2.5, linestyle='--', label='Expected')
-ax.plot(MTs, obs, color='black', linewidth=2.5, linestyle='-', marker='o', label='Observed')
+ax.plot(MTs, med, color='black', linewidth=lw, linestyle='--', label='Expected')
+ax.plot(MTs, obs, color='black', linewidth=lw, linestyle='-', marker=None, label='Observed')
 
 ax.set_ylabel(
     r'$\sigma(pp \to T^\prime bq)$ $\mathcal{B}(T^\prime \to tH)$ [fb]',
@@ -118,8 +120,8 @@ for arr in [XS1_nom, XS1_up, XS1_dn, XS5_nom, XS5_up, XS5_dn]:
         arr[i] = arr[i] * 1000. * 0.25 # factor of 0.25 
 
 # Plot the nominal theory xsecs for 1% and 5% width
-ax.plot(mTheory, XS1_nom, linewidth=2.5, label=r'$\sigma(NLO),$ Singlet $T^{\prime},$ $\Gamma/m_{T^{\prime}}=$1%', color='#e42536')
-ax.plot(mTheory, XS5_nom, linewidth=2.5, label=r'$\sigma(NLO),$ Singlet $T^{\prime},$ $\Gamma/m_{T^{\prime}}=$5%', color='#5790fc')
+ax.plot(mTheory, XS1_nom, linewidth=lw, label=r'$\sigma(NLO),$ Singlet $T^{\prime},$ $\Gamma/m_{T^{\prime}}=$1%', color='#e42536')
+ax.plot(mTheory, XS5_nom, linewidth=lw, label=r'$\sigma(NLO),$ Singlet $T^{\prime},$ $\Gamma/m_{T^{\prime}}=$5%', color='#5790fc')
 # Now plot the uncertainty as a hatched region
 ax.fill_between(mTheory, XS1_dn, XS1_up, color='#e42536', alpha=0.5, linewidth=0)
 ax.fill_between(mTheory, XS5_dn, XS5_up, color='#5790fc', alpha=0.5, linewidth=0)
@@ -162,12 +164,12 @@ y5 = np.array([
 ])
 
 # Plot the nominal theory xsecs for 1% and 5% width
-ax.plot(x1, y1, linewidth=2.5, label=r'$\sigma(NLO),$ Singlet $T^{\prime},$ $\Gamma/m_{T^{\prime}}=$1%', color='#e42536')
-ax.plot(x5, y5, linewidth=2.5, label=r'$\sigma(NLO),$ Singlet $T^{\prime},$ $\Gamma/m_{T^{\prime}}=$5%', color='#5790fc')
+ax.plot(x1, y1, linewidth=lw, label=r'$\sigma(NLO),$ Singlet $T^{\prime},$ $\Gamma/m_{T^{\prime}}=$1%', color='#e42536')
+ax.plot(x5, y5, linewidth=lw, label=r'$\sigma(NLO),$ Singlet $T^{\prime},$ $\Gamma/m_{T^{\prime}}=$5%', color='#5790fc')
 
 # Re-plot the median expected and observed limits so they're above theory
-ax.plot(MTs, med, color='black', linewidth=2.5, linestyle='--')
-ax.plot(MTs, obs, color='black', linewidth=2.5, linestyle='-')
+ax.plot(MTs, med, color='black', linewidth=lw, linestyle='--')
+ax.plot(MTs, obs, color='black', linewidth=lw, linestyle='-')
 
 # Individual results (B2G-22-001 and B2G-23-009) OBSERVED
 B2G_22_001 = np.array([25.16437256945517,30.85610480179935,30.941524694487136,26.607378475308707,22.037054927433825,16.87977483390729,13.95966283338852,15.565000624894477,11.242948802944115,9.959881335062384,10.235842064325476,9.329921430118166,8.704610043857048,8.109859824286733,8.046151076177573,7.86581949928322,7.874056174686013,7.857108786020054,8.055990200360498,8.180352315994078,8.172408868730468])
@@ -182,11 +184,11 @@ B2G_22_001_exp = np.array([48.124991206601614,38.499994495133556,28.874993959034
 B2G_23_009_exp = np.array([128.5842955112457, 48.7729981541633, 26.70712582767, 18.9873520284891, 15.920100733637799, 13.5450521484017, 9.067426435649299, 6.431879941374, 4.876160994172, 4.3437932617962, 3.9556259289383005, 3.3271613065153, 2.8224063571542, 2.3681479506194, 2.1122661419211997, 1.9437948940321002, 1.7868216382339, 1.6383039765059, 1.4881269307807, 1.3377306750043998, 1.2250895379111])
 
 
-ax.plot(MTs, B2G_22_001, color='#832db6', linewidth=2.5, linestyle='solid', label='B2G-22-001')
-ax.plot(MTs, B2G_23_009, color='#e76300', linewidth=2.5, linestyle='solid', label='B2G-23-009')
+ax.plot(MTs, B2G_22_001, color='#7a21dd', linewidth=lw, linestyle='solid', label=r'$\phi\to b\overline{b},\,t\to bq\overline{q}^\prime$')
+ax.plot(MTs, B2G_23_009, color='#e76300', linewidth=lw, linestyle='solid', label=r'$\phi\to b\overline{b},\,t\to b\ell\nu$')
 
-ax.plot(MTs, B2G_22_001_exp, color='#832db6', linewidth=2.5, linestyle='dashed')
-ax.plot(MTs, B2G_23_009_exp, color='#e76300', linewidth=2.5, linestyle='dashed')
+ax.plot(MTs, B2G_22_001_exp, color='#7a21dd', linewidth=lw, linestyle='dashed')
+ax.plot(MTs, B2G_23_009_exp, color='#e76300', linewidth=lw, linestyle='dashed')
 
 
 # Legend stuff 
@@ -214,7 +216,7 @@ first_legend = ax.legend(
     ncol=1, 
     loc="upper left",
     fontsize=fs-12,
-    bbox_to_anchor=(0.01, 0.7, 0.5, 0.2)
+    bbox_to_anchor=(0.045, 0.7, 0.5, 0.2)
 )
 ax.add_artist(first_legend)  # Add the first legend to the plot
 
@@ -230,7 +232,9 @@ second_legend = ax.legend(
 ax.add_artist(second_legend)  # Add the first legend to the plot
 
 # axis limits
-ax.set_ylim([0.3, 1e3])
+ylim=[0.3, 1e3]
+ylim=[0.4, 500]
+ax.set_ylim(ylim)
 ax.set_xlim([1000,3000])
 
 ax.set_xlabel(r"$m_{T^\prime}$ [GeV]",loc='right', fontsize=fs)
