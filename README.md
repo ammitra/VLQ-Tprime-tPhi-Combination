@@ -8,7 +8,8 @@ B2G-23-009 naming conventions:
 * Syst = correlated
 Common uncertainties
 * `PF -> Prefire`
-* `ParNetSyst -> PNetXbb_tag`
+* `ParNetSyst -> PNetXbb_mistag`
+* `ParNet_Sig -> PNetXbb_tag`
 * `lumi_Run2 -> lumi_correlated` (note, this is an lnN nuisance so only needs changed in the card)
 * `TT_LHE -> qcd_ren_scale_TT`
 * `jer_2016pos -> jer16`
@@ -52,3 +53,13 @@ source scripts/make_combined_cards.sh
 ```
 ./scripts/B2G-23-009_specific.sh
 ```
+
+5. Plotting 
+
+* `scripts/HiggsLimits.py`: Plot $\sigma(pp \to T^\prime bq)\mathcal{B}(T^\prime \to tH)$ for the combination results, with B2G-23-009 and B2G-22-001 expected and observed results overlaid. 
+    * Used to produce paper plot. 
+* `scripts/Plot_2DLims_Rectangle.py`: Plots the expected and observed limits for the combination in a box style. 
+    * Used to produce paper plot. 
+* `scripts/Plot_result_ratios.py`: Compares the ratio of independent results to combination results in a box style for both analyses to quantify the improvement. 
+
+Other plotting scripts under `scripts/` are for testing and did not really work. Not used for paper plots. 
