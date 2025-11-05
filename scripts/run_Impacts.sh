@@ -12,29 +12,38 @@ sig=$1
 
 if [[ $sig -eq 0 ]]; then
     echo "ERROR: requires signal mass point as argument"
-    exit 0
 fi
 
 seed=123456
 tol=0.5
 strat=1
+rmin=-1
 rmax=3
 
-numtoys=500
+params=`python scripts/get_parameters_for_impacts.py`
 
 workDir="combination/$sig"
 echo "cd ${workDir}"
 cd $workDir
 w="workspace_masked.root"
 
-echo "GoF on data..."
-(set -x; combine -M GoodnessOfFit -d $w --algo saturated -m 125  --setParameters r=0 --freezeParameters r --cminDefaultMinimizerStrategy "$strat"  --cminDefaultMinimizerTolerance "$tol" --X-rtd MINIMIZER_MaxCalls=400000 -n Data -v 2)
+echo "Initial fit for impacts"
+(set -x; combineTool.py -M Impacts -d $w -m 125 -n "impacts" \
+    --doInitialFit --toysFrequentist --rMin $rmin --rMax $rmax \
+    --cminDefaultMinimizerStrategy=$strat --cminDefaultMinimizerTolerance "$tol" \
+    --X-rtd MINIMIZER_MaxCalls=400000 \
+    -v 2)
 
-echo "GoF on toys...."
-(set -x; combine -M GoodnessOfFit -d $w --algo saturated -m 125 \
-    --setParameters r=0 --freezeParameters r \ 
-    --cminDefaultMinimizerStrategy "$strat"  --cminDefaultMinimizerTolerance "$tol" 
-    --X-rtd MINIMIZER_MaxCalls=400000 --saveToys -n Toys -v 1 -s "$seed" \
-    -t "$numtoys" --toysFrequentist)
+echo "Running impacts on each parameter"
+for p in $params; do
+    echo "-----------------------------------------------------------------------------------------------------"
+    echo "Running impacts for parameter ${p}..." 
+    (set -x; combine -M MultiDimFit -n "_paramFit_impacts_$p" --algo impact \
+    --redefineSignalPOIs r -P $p --floatOtherPOIs 1 --saveInactivePOI 1 -d $w \
+    --toysFrequentist --cminDefaultMinimizerTolerance $tol \
+    --setParameterRanges r=-0.5,20 \
+    --cminDefaultMinimizerStrategy=$strat -v 1 --X-rtd MINIMIZER_MaxCalls=400000)
+done
+
 
 cd $cwd
