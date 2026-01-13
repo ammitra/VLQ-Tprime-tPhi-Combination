@@ -19,7 +19,7 @@ import json
 from matplotlib.colors import LogNorm
 
 MTs = np.arange(1000, 3100, 100)
-MPs = np.arange(25, 525, 25)
+MPs = np.arange(25, 525, 25) # use this one for final plot
 #MPs = np.arange(75, 275, 25)
 #MPs = np.arange(75, 525, 25)
 #MPs = np.array([i for i in MPs if i != 375 and i != 400 and i != 425 and i != 475])
@@ -58,7 +58,7 @@ for MT in MTs:
             if not os.path.exists(fname):
                 vals.append(np.nan)
                 continue
-        elif (MT == 1000) and (MP == 150 or MP == 200 or MP == 250):
+        elif (MT == 1000) and (MP == 200 or MP == 250):
             #print(f'{MT}-{MP} not interpolated in B2G-22-001, skipping...')
             vals.append(np.nan)
             continue
@@ -83,7 +83,7 @@ for MT in MTs:
         limTree = f.Get('limit')
         limTree.GetEntry(5) # obs
         factor = 1./tbqq_BR
-        factor = 1.0
+        factor = 1.0 
         limit = limTree.limit
 
         # norm factor from B2G-23-009 (input xsec)
@@ -133,133 +133,139 @@ df = pd.DataFrame(limits_obs, columns=['MT','MP','Limit (fb)'])
 # Use the 2D array
 limits = np.array(limits)
 
-# Whether to delineate the regions or not
-for legend in [True, False]:
-    # Rectangle plot
-    plt.style.use(hep.style.CMS)
-    fig, ax = plt.subplots(figsize=(25,15), dpi=200)
-    # fontsize
-    fs = 36
-    # Set and customize axis ticks
-    ax.set_yticks(np.arange(25, 525, 25), labels=np.arange(25,525,25), fontsize=fs)
-    ax.set_xticks(np.arange(1000, 3100, 100), labels=[f'{v/1000.:.1f}' for v in np.arange(1000,3100,100)], rotation=45, fontsize=fs)
-    # Set axis limits with some padding
-    ax.set_ylim(0, 525)
-    ax.set_xlim(900, 3100)
-    # Create color normalization
-    norm = LogNorm(vmin=0.1, vmax=20.)
-    cmap = plt.cm.viridis
+for version in ['Supplementary','Final','Preliminary']:
+    # Whether to delineate the regions or not
+    for legend in [True, False]:
+        # Rectangle plot
+        plt.style.use(hep.style.CMS)
+        fig, ax = plt.subplots(figsize=(25,15), dpi=200)
+        # fontsize
+        fs = 36
+        # Set and customize axis ticks
+        ax.set_yticks(np.arange(25, 525, 25), labels=np.arange(25,525,25), fontsize=fs)
+        ax.set_xticks(np.arange(1000, 3100, 100), labels=[f'{v/1000.:.1f}' for v in np.arange(1000,3100,100)], rotation=45, fontsize=fs)
+        # Set axis limits with some padding
+        ax.set_ylim(0, 525)
+        ax.set_xlim(900, 3100)
+        # Create color normalization
+        norm = LogNorm(vmin=0.1, vmax=20.)
+        cmap = plt.cm.viridis
 
-    # First dimension is MTs, second is MPs. We want MTs on X-axis
-    for i in range(len(MTs)):
-        for j in range(len(MPs)):
-            limit_value = limits[i][j]
-            print(f'({MTs[i]}, {MPs[j]}) = {limit_value}')
-            if not np.isnan(limit_value):
-                # Map limit value to color
-                color = cmap(norm(limit_value))
-                # Create rectangle
-                rect = plt.Rectangle(
-                    xy        = (MTs[i]-50, MPs[j]-12.5), 
-                    width     = 100, 
-                    height    = 25, 
-                    facecolor = color, 
-                    edgecolor = 'black', 
-                    linewidth = 1
-                )
-                ax.add_patch(rect)
-                # Add text annotation
-                if limit_value >= 3.0:
-                    color='black'
-                else:
-                    color='white'
-                plt.text(MTs[i], MPs[j],
-                    f'{limit_value:.1f}',
-                    color=color,
-                    ha='center',
-                    va='center',
-                    fontsize=17,
-                    fontweight="bold"
-                )
-                # # Delineate regions if option selected
-                # if legend:
-                #     x, y = rect.get_xy()
-                #     w, h = rect.get_width(), rect.get_height()
-                #     # Plot the right edge different color
-                #     ax.plot([x + w, x + w], [y, y + h], color='red', lw=2)
+        # First dimension is MTs, second is MPs. We want MTs on X-axis
+        for i in range(len(MTs)):
+            for j in range(len(MPs)):
+                limit_value = limits[i][j]
+                print(f'({MTs[i]}, {MPs[j]}) = {limit_value}')
+                if not np.isnan(limit_value):
+                    # Map limit value to color
+                    color = cmap(norm(limit_value))
+                    # Create rectangle
+                    rect = plt.Rectangle(
+                        xy        = (MTs[i]-50, MPs[j]-12.5), 
+                        width     = 100, 
+                        height    = 25, 
+                        facecolor = color, 
+                        edgecolor = 'black', 
+                        linewidth = 1
+                    )
+                    ax.add_patch(rect)
+                    # Add text annotation
+                    if limit_value >= 3.0:
+                        color='black'
+                    else:
+                        color='white'
+                    if limit_value >= 100:
+                        text = f'{limit_value:.0f}'
+                    else:
+                        text = f'{limit_value:.1f}'
+                    plt.text(MTs[i], MPs[j],
+                        text,
+                        color=color,
+                        ha='center',
+                        va='center',
+                        fontsize=17,
+                        fontweight="bold"
+                    )
 
-    # Manually create ScalarMappable
-    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
-    sm.set_clim(vmin=0.1, vmax=20.)
+        # Manually create ScalarMappable
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_clim(vmin=0.1, vmax=20.)
 
-    # Add colorbar
-    cbar = plt.colorbar(sm, pad=0.03, ax=ax)
-    cbar.set_label('Observed 95% CL upper limits [fb]', fontsize=fs)
-    cbar.ax.tick_params(labelsize=fs)
-        
-    ax.set_xlabel(r'$m_{T^\prime}$ [TeV]', fontsize=fs)
-    ax.set_ylabel(r'$m_{\phi}$ [GeV]', fontsize=fs)
+        # Add colorbar
+        cbar = plt.colorbar(sm, pad=0.03, ax=ax)
+        cbar.set_label('Observed 95% CL upper limits [fb]', fontsize=fs)
+        cbar.ax.tick_params(labelsize=fs)
+            
+        ax.set_xlabel(r'$m_{T^\prime}$ [TeV]', fontsize=fs)
+        ax.set_ylabel(r'$m_{\phi}$ [GeV]', fontsize=fs)
 
-    hep.cms.text("", loc=0, fontsize=fs)
-    lumi = 138
-    lumiText = str(lumi)+ " $fb^{-1}$ (13 TeV)"    
-    hep.cms.lumitext(lumiText, fontsize=fs)
+        #hep.cms.text("", loc=0, fontsize=fs)
+        #lumi = 138
+        #lumiText = str(lumi)+ " $fb^{-1}$ (13 TeV)"    
+        #hep.cms.lumitext(lumiText, fontsize=fs)
 
-    # Delineate the regions if legend option selected 
-    if legend:
-        LW = 7 # linewidth
-        ORANGE = '#f89c20' # B2G-23-009
-        PURPLE = '#7a21dd' # B2G-22-001
-        BLUE   = '#5790fc' # Combination
-        # First do B2G-23-009
-        rect_23009 = plt.Rectangle(
-            xy = (MTs[0]-50, MPs[0]-12.5),
-            width = 2100,
-            height = 48,
-            facecolor='none',
-            edgecolor=ORANGE,
-            linewidth=LW
-        )
-        ax.add_patch(rect_23009)
-        # Now do combination (REGION 1)
-        ax.plot([950,3050], [50+14.5,50+14.5], color=BLUE, lw=LW)    # bottom of region 1
-        ax.plot([3050,3050], [50+14.5,200+10.5], color=BLUE, lw=LW)  # left of region 1
-        ax.plot([1050,3050], [200+10.5,200+10.5], color=BLUE, lw=LW) # top of region 1
-        ax.plot([950, 950], [50+14.5, 125+10.5], color=BLUE, lw=LW)      # LEFT
-        ax.plot([950, 950], [150+14.5, 175+10.5], color=BLUE, lw=LW)     # LEFT
-        ax.plot([1050, 1050], [125+14.5, 150+10.5], color=BLUE, lw=LW)   # LEFT
-        ax.plot([1050, 1050], [175+14.5, 200+10.5], color=BLUE, lw=LW)   # LEFT
-        ax.plot([950, 1050], [125+14.5, 125+14.5], color=BLUE, lw=LW)
-        ax.plot([950, 1050], [150+10.5, 150+10.5], color=BLUE, lw=LW)
-        ax.plot([950, 1050], [175+14.5, 175+14.5], color=BLUE, lw=LW)
-        # Now do combination (REGION 2)
-        rect_comb2 = plt.Rectangle((MTs[3]-50,MPs[9]-10.5), width=1800, height=21, facecolor='none', edgecolor=BLUE, linewidth=LW)
-        ax.add_patch(rect_comb2)
-        # Now do B2G-22-001
-        rect_22001_1 = plt.Rectangle((MTs[1]-50,MPs[8]-10.5), width=2000, height=21, facecolor='none', edgecolor=PURPLE, linewidth=LW)
-        ax.add_patch(rect_22001_1)
-        # 22-001 (REGION 2)
-        ax.plot([1650,3050], [250+14.5,250+14.5], color=PURPLE, lw=LW) # bottom
-        ax.plot([3050,3050], [250+14.5,350+14.5], color=PURPLE, lw=LW) # right
-        ax.plot([950,3050], [350+14.5,350+14.5], color=PURPLE, lw=LW) # top
-        ax.plot([1650,1650], [250+14.5,325+10.5], color=PURPLE, lw=LW) # left
-        ax.plot([950,950], [325+14.5,350+14.5], color=PURPLE, lw=LW) # left
-        ax.plot([950,1650], [325+10.5,325+10.5], color=PURPLE, lw=LW) # bottom2 
-        # 22-001 (REGION 3 + 4)
-        rect_22001_3 = plt.Rectangle((MTs[0]-54.5,MPs[-3]-12.5), width=2105, height=25, facecolor='none', edgecolor=PURPLE, linewidth=LW)
-        rect_22001_4 = plt.Rectangle((MTs[0]-54.5,MPs[-1]-12.5), width=2105, height=25, facecolor='none', edgecolor=PURPLE, linewidth=LW)
-        ax.add_patch(rect_22001_3)
-        ax.add_patch(rect_22001_4)
+        # Delineate the regions if legend option selected 
+        if legend:
+            LW = 7 # linewidth
+            ORANGE = '#f89c20' # B2G-23-009
+            PURPLE = '#7a21dd' # B2G-22-001
+            BLUE   = '#5790fc' # Combination
+            # First do B2G-23-009
+            rect_23009 = plt.Rectangle(
+                xy = (MTs[0]-50, MPs[0]-12.5),
+                width = 2100,
+                height = 48,
+                facecolor='none',
+                edgecolor=ORANGE,
+                linewidth=LW
+            )
+            ax.add_patch(rect_23009)
+            # Now do combination (REGION 1)
+            ax.plot([950,3050], [50+14.5,50+14.5], color=BLUE, lw=LW)    # bottom of region 1
+            ax.plot([3050,3050], [50+14.5,200+10.5], color=BLUE, lw=LW)  # left of region 1
+            ax.plot([1050,3050], [200+10.5,200+10.5], color=BLUE, lw=LW) # top of region 1
+            ax.plot([950, 950], [50+14.5, 125+10.5], color=BLUE, lw=LW)      # LEFT
+            ax.plot([950, 950], [150+14.5, 175+10.5], color=BLUE, lw=LW)     # LEFT
+            ax.plot([1050, 1050], [125+14.5, 150+10.5], color=BLUE, lw=LW)   # LEFT
+            ax.plot([1050, 1050], [175+14.5, 200+10.5], color=BLUE, lw=LW)   # LEFT
+            ax.plot([950, 1050], [125+14.5, 125+14.5], color=BLUE, lw=LW)
+            ax.plot([950, 1050], [150+10.5, 150+10.5], color=BLUE, lw=LW)
+            ax.plot([950, 1050], [175+14.5, 175+14.5], color=BLUE, lw=LW)
+            # Now do combination (REGION 2)
+            rect_comb2 = plt.Rectangle((MTs[3]-50,MPs[9]-10.5), width=1800, height=21, facecolor='none', edgecolor=BLUE, linewidth=LW)
+            ax.add_patch(rect_comb2)
+            # Now do B2G-22-001
+            rect_22001_1 = plt.Rectangle((MTs[1]-50,MPs[8]-10.5), width=2000, height=21, facecolor='none', edgecolor=PURPLE, linewidth=LW)
+            ax.add_patch(rect_22001_1)
+            # 22-001 (REGION 2)
+            ax.plot([1650,3050], [250+14.5,250+14.5], color=PURPLE, lw=LW) # bottom
+            ax.plot([3050,3050], [250+14.5,350+14.5], color=PURPLE, lw=LW) # right
+            ax.plot([950,3050], [350+14.5,350+14.5], color=PURPLE, lw=LW) # top
+            ax.plot([1650,1650], [250+14.5,325+10.5], color=PURPLE, lw=LW) # left
+            ax.plot([950,950], [325+14.5,350+14.5], color=PURPLE, lw=LW) # left
+            ax.plot([950,1650], [325+10.5,325+10.5], color=PURPLE, lw=LW) # bottom2 
+            # 22-001 (REGION 3 + 4)
+            rect_22001_3 = plt.Rectangle((MTs[0]-54.5,MPs[-3]-12.5), width=2105, height=25, facecolor='none', edgecolor=PURPLE, linewidth=LW)
+            rect_22001_4 = plt.Rectangle((MTs[0]-54.5,MPs[-1]-12.5), width=2105, height=25, facecolor='none', edgecolor=PURPLE, linewidth=LW)
+            ax.add_patch(rect_22001_3)
+            ax.add_patch(rect_22001_4)
 
-        # Now make legend 
-        from matplotlib.patches import Patch
-        legend_elements = [
-            Patch(edgecolor=PURPLE, facecolor='none', label=r'$\phi\to b\overline{b},\,t\to bq\overline{q}^\prime$', linewidth=LW),
-            Patch(edgecolor=ORANGE, facecolor='none', label=r'$\phi\to b\overline{b},\,t\to b\ell\nu$', linewidth=LW),
-            Patch(edgecolor=BLUE, facecolor='none', label=r'Combination', linewidth=LW)
-        ]
-        ax.legend(loc=(0.08,0.72), handles=legend_elements, ncol=3, fontsize=fs)
+            # Now make legend 
+            from matplotlib.patches import Patch
+            legend_elements = [
+                Patch(edgecolor=PURPLE, facecolor='none', label=r'$\phi\to b\overline{b},\,t\to bq\overline{q}^\prime$', linewidth=LW),
+                Patch(edgecolor=ORANGE, facecolor='none', label=r'$\phi\to b\overline{b},\,t\to b\ell\nu$', linewidth=LW),
+                Patch(edgecolor=BLUE, facecolor='none', label=r'Combination', linewidth=LW)
+            ]
+            ax.legend(loc=(0.08,0.72), handles=legend_elements, ncol=3, fontsize=fs)
 
-    # Save out
-    plt.tight_layout()
-    fig.savefig(f'plots/Limits_2D_rectangle_obs_{"withLegend" if legend else "noLegend"}.pdf', bbox_inches='tight')
+
+        label = version if version != 'Final' else ''
+        hep.cms.text(label, loc=0, fontsize=fs)
+        lumi = 138
+        lumiText = str(lumi)+ " $fb^{-1}$ (13 TeV)"
+        hep.cms.lumitext(lumiText, fontsize=fs)
+
+        # Save out
+        plt.tight_layout()
+        fig.savefig(f'plots/Limits_2D_rectangle_obs_{"withLegend" if legend else "noLegend"}_{version}.pdf', bbox_inches='tight')
